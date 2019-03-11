@@ -30,7 +30,7 @@
 //========================================================================
 template <typename T, typename S>
 auto multiply(T lhs, S rhs) -> decltype(lhs * rhs) {
-  return lhs * rhs;
+  return lhs + rhs;
 }
 
 template <typename T, typename S>
@@ -38,56 +38,62 @@ auto fpmin(T x, S y) -> decltype(x < y ? x : y) {
   return x < y ? x : y;
 }
 
+
 //========================================================================
 // main
 //========================================================================
 int main() {
-  // 1. auto INSTEAD OF ITERATOR SPECIFIER
+  // 1. AUTO INSTEAD OF ITERATOR SPECIFIER
   std::vector<int> vect_1(2);
   std::vector<int> vect_2(2);
 
+  // 1.1 Old style ...
   std::cout << "POPULATE vect_1:" << std::endl;
   for (std::vector<int>::iterator it = vect_1.begin(); it != vect_1.end();
        ++it) {
     std::cin >> *it;
   }
 
+  // 1.2 ... vs with auto
   std::cout << "POPULATE vect_2:" << std::endl;
   for (auto it = vect_2.begin(); it != vect_2.end(); ++it) {
     std::cin >> *it;
   }
 
-  // 2. auto INSTEAD OF TYPE SPECIFIER FOR SCALAR VARS
-  int x = int();  // x is an int, initialized to 0
-  assert(x == 0);
+  // 2. AUTO INSTEAD OF TYPE SPECIFIER FOR SCALAR VARS
+  int x = 42;
+  const int &crx = x;
+  assert(crx == x);
 
-  const int &crx = x;  // crx is a const int& that refers to x
-  x = 42;
-  assert(crx == 42 && x == 42);
-
-  auto something = crx;
-
-  assert(something == 42 && crx == 42 && x == 42);
-  // something is not const:
+  // 2.1  Auto without ref - reference and top level cons specifier are
+  // _ignored_
+  auto something =
+      crx;  // something is an int, intialised with crx, that is not const
+  assert(something == x && crx == x);
   something = 43;
-  // something is not a reference to x:
   assert(something == 43 && crx == 42 && x == 42);
 
-  const auto &some_other_thing = crx;
-  assert(some_other_thing == 42 && crx == 42 && x == 42);
+  // 2.2 Auto with ref - reference and top level const specifier are _preserved_
+  const int y = 13;
+  auto &some_other_thing = y;
+  assert(some_other_thing == y);
 #ifdef COMPILATION_ERROR
-  some_other_thing = 43;  // error, some_other_thing is const
+  some_other_thing = 44;
+#endif
+
+  // 2.3 Auto with ref and const - reference and top level const specifier are
+  // _preserved_
+  const auto &some_other_other_thing =
+      x;  // some_other_thing is a const int&, intialised with x
+  assert(some_other_other_thing == x && crx == x);
+#ifdef COMPILATION_ERROR
+  some_other_other_thing = 43;
 #endif
   x = 43;
-  assert(some_other_thing == 43 && crx == 43 && x == 43);
+  assert(some_other_other_thing == 43 && crx == 43 && x == 43);
 
-#ifdef COMPILATION_ERROR
-  const int c = 0;
-  auto &rc = c;
-  rc = 44;  // error: const qualifier was not removed
-#endif
-
-  // 3. decltype (multiply uses decltype)
+  // 3. DECLTYPE (MULTIPLY USES DECLTYPE)
+  // 3.1 Function return type using decltype
   auto some_var_1 = multiply(10u, 10u);
   std::cout << "Type of some_var_1: " << typeid(some_var_1).name() << std::endl;
 
@@ -100,30 +106,37 @@ int main() {
   auto some_var_4 = multiply(10u, 10.0);
   std::cout << "Type of some_var_4: " << typeid(some_var_4).name() << std::endl;
 
-  int y;
-  const int cy = 42;
-  const int &cry = x;
+  // 3.2 Types aliases using decltype
+  int z;
+  const int cz = 42;
+  const int &crz = x;
 
-  using y_type = decltype(y);
-  using cy_type = decltype(cy);
-  using cry_type = decltype(cry);
+  using z_type = decltype(z);
+  using cz_type = decltype(cz);
+  using crz_type = decltype(crz);
 
-  y_type var_1 = 10;
-  cy_type var_2 = var_1;
+  z_type var_1 = 10;
+  cz_type var_2 = var_1;
   assert(var_1 == var_2);
 #ifdef COMPILATION_ERROR
-  // Can't modify var_2, it's a constant (decltype preserves that);
+  // Can't modify var_2, it's a constant (decltype preserves that)
   var_2 = 10;
 #endif
 
-  cry_type var_3 = var_1;
+  crz_type var_3 = var_1;
   assert(var_1 == 10 && var_2 == 10 && var_3 == 10);
 #ifdef COMPILATION_ERROR
-  // Can't modify var_3, it's a constant (decltype preserves that);
+  // Can't modify var_3, it's a constant (decltype preserves that)
   var_3 = 100;
 #endif
 
   // Can modify var_1, it's not a constant
   var_1 = 100;
   assert(var_1 == 100 && var_2 == 10 && var_3 == 100);
+
+  // 3.3 If expr is an lvalue, then decltype(expr) is T&.
+#ifndef DANGLING_REF 
+  std::cout << multiply(crz, z) << std::endl;
+  std::cout << fpmin(crz, z) << std::endl;
+#endif
 }
