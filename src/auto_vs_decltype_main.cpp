@@ -13,6 +13,11 @@
 //    for a template argument. However with auto, § 7.1.6.4/6 has explicit
 //    support for std::initializer_list<>
 //
+//    Experiment by:
+//      * (un-)defining COMPILATION_ERROR
+//      * (un-)defining DANGLING_REF_OR_PTR
+//    and checking the behaviour before and after.
+//
 //    References:
 //    * http://thbecker.net/articles/auto_and_decltype/section_01.html
 //
@@ -20,6 +25,7 @@
 //========================================================================
 #include <cassert>
 #include <iostream>
+#include <type_traits>
 #include <typeinfo>
 #include <vector>
 
@@ -28,16 +34,26 @@
 //========================================================================
 // Helper objects/functions
 //========================================================================
+// AFAIK the result of multiplication is never an lvalue and hence decltype
+// never gives SomeType&, but SomeType instead.
 template <typename T, typename S>
 auto multiply(T lhs, S rhs) -> decltype(lhs * rhs) {
-  return lhs + rhs;
+  return lhs * rhs;
 }
 
+// The return value of the tenary operator "?" is an lvalue and if expr is an
+// lvalue, then decltype(expr) is SomeType&. Therefore, without
+// std::remove_reference the following would be returning a ref to a local
+// variable.
 template <typename T, typename S>
-auto fpmin(T x, S y) -> decltype(x < y ? x : y) {
+auto min_func(T x, S y) ->
+#ifndef DANGLING_REF_OR_PTR
+    typename std::remove_reference<decltype(x < y ? x : y)>::type {
+#else
+    decltype(x < y ? x : y) {
+#endif
   return x < y ? x : y;
 }
-
 
 //========================================================================
 // main
@@ -107,7 +123,7 @@ int main() {
   std::cout << "Type of some_var_4: " << typeid(some_var_4).name() << std::endl;
 
   // 3.2 Types aliases using decltype
-  int z;
+  int z = 10;
   const int cz = 42;
   const int &crz = x;
 
@@ -134,9 +150,10 @@ int main() {
   var_1 = 100;
   assert(var_1 == 100 && var_2 == 10 && var_3 == 100);
 
-  // 3.3 If expr is an lvalue, then decltype(expr) is T&.
-#ifndef DANGLING_REF 
-  std::cout << multiply(crz, z) << std::endl;
-  std::cout << fpmin(crz, z) << std::endl;
-#endif
+  // 3.3 Dangling ref when using decltype for functions
+  // Always safe
+  std::cout << multiply(z, crz) << std::endl;
+  // Check the implementation for comments, but this might be returning a ref
+  // to a local variable.
+  std::cout << min_func(z, crz) << std::endl;
 }
