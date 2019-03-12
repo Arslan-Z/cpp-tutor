@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(cpp-tutor_COMPILER_OPTIONS_CLANG -fcolor-diagnostics)
 set(cpp-tutor_COMPILER_OPTIONS_GNU -fdiagnostics-color=always)
+set(cpp-tutor_COMPILER_OPTIONS_MSVC /Wall /WX)
 
 set(cppTutor_EXECUTABLES
     cppTutorUT
@@ -107,7 +108,8 @@ foreach( executable ${cppTutor_EXECUTABLES} )
 target_compile_options(${executable} PRIVATE
   "$<$<CXX_COMPILER_ID:Clang>:${cpp-tutor_COMPILER_OPTIONS_CLANG}>"
   "$<$<CXX_COMPILER_ID:AppleClang>:${cpp-tutor_COMPILER_OPTIONS_CLANG}>"
-  "$<$<CXX_COMPILER_ID:GNU>:${cpp-tutor_COMPILER_OPTIONS_GNU}>")
+  "$<$<CXX_COMPILER_ID:GNU>:${cpp-tutor_COMPILER_OPTIONS_GNU}>"
+  "$<$<CXX_COMPILER_ID:MSVC>:${cpp-tutor_COMPILER_OPTIONS_MSVC}>")
 endforeach()
 
 # Additional set-up for unit tests
