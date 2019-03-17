@@ -163,7 +163,7 @@ The items covered in this tutorial so far (with some relevant links):
      * `const_vs_constexpr_main.cpp`, `null_vs_nullptr_main.cpp`,
        `auto_vs_decltype_main.cpp`
 8. [Initialization in modern C++](https://www.youtube.com/watch?v=SCoewvXablk)
-   (is [bonkers](https://www.youtube.com/watch?v=SCoewvXablk))
+   (is [bonkers](https://blog.tartanllama.xyz/initialization-is-bonkers/))
    * init values for variables with automatic and static storage duration
    * types of initialization (direct, copy, value, list)
    * brace elistion in list initialization
