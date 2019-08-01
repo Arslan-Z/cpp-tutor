@@ -25,7 +25,6 @@
 #include <cppt_tools.hpp>
 
 #include <algorithm>
-#include <algorithm>
 #include <iostream>
 #include <memory>
 #include <string>

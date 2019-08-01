@@ -1,7 +1,7 @@
 cpp-tutor
 =========
 [![Build Status](https://travis-ci.org/banach-space/cpp-tutor.svg?branch=master)](https://travis-ci.org/banach-space/cpp-tutor)
-[![Build status](https://ci.appveyor.com/api/projects/status/axf91gjs67eoms4s/branch/add_appveyor?svg=true)](https://ci.appveyor.com/project/banach-space/cpp-tutor/branch/add_appveyor)
+[![Build status](https://ci.appveyor.com/api/projects/status/axf91gjs67eoms4s/branch/add_appveyor?svg=true)](https://ci.appveyor.com/project/banach-space/cpp-tutor/branch/master)
 
 Code examples for tutoring modern C++.
 
